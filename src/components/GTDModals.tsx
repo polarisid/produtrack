@@ -6,12 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useGTDStore } from "@/store/useGTDStore";
-import { clarifyInboxItem, breakdownTask, unblockTask, UnblockResult } from "@/lib/gtd-ai";
+import { clarifyInboxItem, breakdownTask, unblockTask, UnblockResult, processBrainDump } from "@/lib/gtd-ai";
 import { Sparkles, Brain, Zap } from "lucide-react";
 
 export function CaptureModal() {
   const { isCaptureModalOpen, setCaptureModalOpen, addInboxItem } = useGTDStore();
   const [title, setTitle] = React.useState("");
+  const [isProcessing, setIsProcessing] = React.useState(false);
 
   const handleSave = (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -21,24 +22,55 @@ export function CaptureModal() {
     setCaptureModalOpen(false);
   };
 
+  const handleSmartDump = async () => {
+    if (!title.trim()) return;
+    setIsProcessing(true);
+    try {
+      const items = await processBrainDump(title);
+      if (items && items.length > 0) {
+        items.forEach(item => {
+          if (item.trim()) addInboxItem(item.trim());
+        });
+        setTitle("");
+        setCaptureModalOpen(false);
+      } else {
+        alert("A IA não conseguiu encontrar itens acionáveis no texto. Tente reescrever.");
+      }
+    } catch (e: any) {
+      console.error("AI Dump Error:", e);
+      alert("Erro ao extrair com IA: " + (e.message || "Tente novamente."));
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   return (
     <Dialog open={isCaptureModalOpen} onOpenChange={setCaptureModalOpen}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Capturar no Inbox</DialogTitle>
+          <DialogTitle>Despejo Mental (Captura)</DialogTitle>
           <DialogDescription>
-            Coloque a ideia ou pendência que está na sua cabeça agora.
+            Jogue ideias, tarefas e rascunhos. Salve normalmente ou peça para a IA separar itens misturados na sua Caixa de Entrada.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSave} className="flex flex-col gap-4 py-4">
-          <Input
+        <div className="flex flex-col gap-4 py-4">
+          <Textarea
             autoFocus
-            placeholder="O que está na sua mente?"
+            placeholder="O que está na sua mente? Ex:&#10;- Ligar para o cliente amanhã&#10;- Consertar o relatório de vendas..."
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            className="min-h-[120px] resize-y"
           />
-          <Button type="submit" disabled={!title.trim()}>Capturar</Button>
-        </form>
+          <div className="flex flex-col sm:flex-row justify-end gap-2 mt-2">
+            <Button variant="outline" onClick={handleSave} disabled={!title.trim() || isProcessing} className="flex-1 sm:flex-none">
+              Adicionar como 1 Item
+            </Button>
+            <Button onClick={handleSmartDump} disabled={!title.trim() || isProcessing} className="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20">
+              <Sparkles className={`w-4 h-4 mr-2 ${isProcessing ? 'animate-spin' : ''}`} />
+              Extrair com IA
+            </Button>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
@@ -352,6 +384,7 @@ export function TaskDetailsModal() {
     projects,
     updateTaskStatus, 
     updateTaskProject,
+    updateTaskDate,
     updateTaskDescription,
     addSubtask,
     toggleSubtask,
@@ -444,6 +477,40 @@ export function TaskDetailsModal() {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-muted-foreground">Prazo:</span>
+              <Select 
+                value={["Hoje", "Amanhã", "Próxima Semana", "Sem data"].includes(task.dateStr) ? task.dateStr : "custom"} 
+                onValueChange={(val) => {
+                  if (val !== "custom") updateTaskDate(task.id, val as string);
+                  else {
+                    updateTaskDate(task.id, !["Hoje", "Amanhã", "Próxima Semana", "Sem data"].includes(task.dateStr) ? task.dateStr : "Definir...");
+                  }
+                }}
+              >
+                <SelectTrigger className="w-[140px] h-8 text-xs">
+                  <SelectValue placeholder="Sem data" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Hoje">Hoje</SelectItem>
+                  <SelectItem value="Amanhã">Amanhã</SelectItem>
+                  <SelectItem value="Próxima Semana">Próxima Semana</SelectItem>
+                  <SelectItem value="Sem data">Sem data</SelectItem>
+                  <SelectItem value="custom">Data exata</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              {(!["Hoje", "Amanhã", "Próxima Semana", "Sem data"].includes(task.dateStr)) && (
+                <Input 
+                  placeholder="Ex: 25/12/2026"
+                  className="w-[120px] h-8 text-xs animate-in fade-in zoom-in slide-in-from-left-2"
+                  value={task.dateStr === "Definir..." ? "" : task.dateStr}
+                  onChange={(e) => updateTaskDate(task.id, e.target.value)}
+                  autoFocus
+                />
+              )}
             </div>
           </div>
 

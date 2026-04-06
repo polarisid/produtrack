@@ -87,6 +87,7 @@ type GTDState = PersistedData & {
   toggleTaskStatus: (id: string) => void;
   updateTaskStatus: (id: string, status: TaskStatus) => void;
   updateTaskProject: (id: string, projectId?: string) => void;
+  updateTaskDate: (id: string, dateStr: string) => void;
   updateTaskDescription: (id: string, description: string) => void;
   
   addSubtask: (taskId: string, title: string) => void;
@@ -169,6 +170,10 @@ export const useGTDStore = create<GTDState>((set) => ({
 
   updateTaskProject: (id, projectId) => set((state) => ({
     tasks: state.tasks.map(t => t.id === id ? { ...t, projectId } : t)
+  })),
+
+  updateTaskDate: (id, dateStr) => set((state) => ({
+    tasks: state.tasks.map(t => t.id === id ? { ...t, dateStr } : t)
   })),
 
   updateTaskDescription: (id, description) => set((state) => ({

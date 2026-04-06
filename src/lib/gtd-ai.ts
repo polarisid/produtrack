@@ -160,3 +160,22 @@ Gere um JSON válido SEM MARCAÇÃO MARKDOWN com a seguinte estrutura:
   const responseText = result.response.text().replace(/```json/g, '').replace(/```/g, '').trim();
   return JSON.parse(responseText) as WeeklyInsightsResult;
 }
+
+export async function processBrainDump(text: string): Promise<string[]> {
+  const prompt = `Você é uma ferramenta de produtividade "Smart Brain Dump" baseada em GTD.
+O usuário despejou um raciocínio longo, confuso ou não formatado que contem várias tarefas, pendências ou ideias misturadas.
+
+Texto do Despejo:
+"""
+${text}
+"""
+
+Sua tarefa é separar e extrair cada intenção viável de ação ou ideia como um item independente. Não perca contexto, reescreva se necessário para ser inteligível por si só.
+Retorne APENAS um JSON array de strings (sem formatação markdown). Por exemplo:
+["Comprar pão na padaria amanhã", "Enviar e-mail para o Roberto sobre o relatório de vendas", "Cancelar assinatura da Netflix"]
+`;
+
+  const result = await model.generateContent(prompt);
+  const responseText = result.response.text().replace(/```json/g, '').replace(/```/g, '').trim();
+  return JSON.parse(responseText) as string[];
+}
