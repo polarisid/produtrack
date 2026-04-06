@@ -141,7 +141,7 @@ export default function Dashboard() {
                 <p className="text-xs text-muted-foreground mt-1">
                   {weeklyLabel}
                 </p>
-                <p className="text-[10px] text-muted-foreground/60 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   {doneTasks.length} de {scheduledTasks.length} tarefas com prazo concluídas
                 </p>
               </CardContent>
@@ -187,7 +187,7 @@ export default function Dashboard() {
               <CardDescription className="text-primary-foreground/80 text-xs mt-1">
                 Sua revisão semanal está pendente. Esvazie a mente e prepare a próxima semana.
               </CardDescription>
-              <Link href="/revisao" className={buttonVariants({ variant: "secondary", size: "sm", className: "w-full mt-4 font-semibold text-xs" })}>
+              <Link href="/revisao" className={buttonVariants({ variant: "outline", size: "sm", className: "w-full mt-4 font-semibold text-sm border-white/50 text-white hover:bg-white/15 hover:text-white" })}>
                 Iniciar Revisão
               </Link>
             </CardHeader>

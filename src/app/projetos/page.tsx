@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { useGTDStore } from "@/store/useGTDStore";
 
 export default function ProjetosPage() {
-  const { projects, tasks, toggleTaskStatus } = useGTDStore();
+  const { projects, tasks, toggleTaskStatus, setProjectModalOpen } = useGTDStore();
   const [selectedProjectId, setSelectedProjectId] = React.useState<string | null>(null);
 
   const selectedProject = projects.find(p => p.id === selectedProjectId);
@@ -30,7 +30,7 @@ export default function ProjetosPage() {
           </p>
         </div>
         
-        <Button className="w-full md:w-auto shadow-sm gap-2 mt-4 md:mt-0">
+        <Button className="w-full md:w-auto shadow-sm gap-2 mt-4 md:mt-0" onClick={() => setProjectModalOpen(true)}>
           <Plus className="h-4 w-4" /> Novo Projeto
         </Button>
       </div>

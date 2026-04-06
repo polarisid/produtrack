@@ -8,8 +8,8 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-heading: var(--font-heading);
+  --font-mono: ui-monospace, 'Cascadia Code', monospace;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -48,83 +48,214 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* ─── Light Mode ─────────────────────────────────────── */
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  /* Warm off-white background — easier on the eyes than pure white */
+  --background:      oklch(0.985 0.004 265);
+  --foreground:      oklch(0.13 0.02 260);
+
+  --card:            oklch(1 0 0);
+  --card-foreground: oklch(0.13 0.02 260);
+
+  --popover:            oklch(1 0 0);
+  --popover-foreground: oklch(0.13 0.02 260);
+
+  /* Indigo primary */
+  --primary:            oklch(0.58 0.22 264);
+  --primary-foreground: oklch(0.99 0 0);
+
+  --secondary:            oklch(0.94 0.01 265);
+  --secondary-foreground: oklch(0.25 0.03 264);
+
+  --muted:            oklch(0.94 0.01 265);
+  --muted-foreground: oklch(0.52 0.03 264);
+
+  --accent:            oklch(0.94 0.01 265);
+  --accent-foreground: oklch(0.25 0.03 264);
+
+  --destructive: oklch(0.58 0.23 27);
+
+  --border: oklch(0.88 0.01 265);
+  --input:  oklch(0.88 0.01 265);
+  --ring:   oklch(0.58 0.22 264 / 40%);
+
+  --chart-1: oklch(0.58 0.22 264);
+  --chart-2: oklch(0.68 0.17 220);
+  --chart-3: oklch(0.75 0.14 185);
+  --chart-4: oklch(0.65 0.19 300);
+  --chart-5: oklch(0.62 0.20 30);
+
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+
+  --sidebar:                    oklch(0.975 0.005 265);
+  --sidebar-foreground:         oklch(0.13 0.02 260);
+  --sidebar-primary:            oklch(0.58 0.22 264);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent:             oklch(0.92 0.02 265);
+  --sidebar-accent-foreground:  oklch(0.25 0.03 264);
+  --sidebar-border:             oklch(0.88 0.01 265);
+  --sidebar-ring:               oklch(0.58 0.22 264 / 40%);
 }
 
+/* ─── Dark Mode ──────────────────────────────────────── */
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* Deep navy-dark — richer than pure black, used by Linear & Vercel */
+  --background:      oklch(0.14 0.02 264);
+  --foreground:      oklch(0.94 0.01 265);
+
+  --card:            oklch(0.18 0.025 264);
+  --card-foreground: oklch(0.94 0.01 265);
+
+  --popover:            oklch(0.18 0.025 264);
+  --popover-foreground: oklch(0.94 0.01 265);
+
+  /* Indigo primary — slightly lighter/brighter in dark */
+  --primary:            oklch(0.65 0.22 264);
+  --primary-foreground: oklch(0.10 0.02 264);
+
+  --secondary:            oklch(0.22 0.03 264);
+  --secondary-foreground: oklch(0.90 0.01 265);
+
+  --muted:            oklch(0.22 0.03 264);
+  --muted-foreground: oklch(0.68 0.03 265);
+
+  --accent:            oklch(0.24 0.04 264);
+  --accent-foreground: oklch(0.90 0.01 265);
+
+  --destructive: oklch(0.65 0.22 27);
+
+  --border: oklch(1 0 0 / 9%);
+  --input:  oklch(1 0 0 / 12%);
+  --ring:   oklch(0.65 0.22 264 / 40%);
+
+  --chart-1: oklch(0.65 0.22 264);
+  --chart-2: oklch(0.70 0.18 220);
+  --chart-3: oklch(0.72 0.15 185);
+  --chart-4: oklch(0.68 0.20 300);
+  --chart-5: oklch(0.65 0.21 30);
+
+  --sidebar:                    oklch(0.16 0.022 264);
+  --sidebar-foreground:         oklch(0.94 0.01 265);
+  --sidebar-primary:            oklch(0.65 0.22 264);
+  --sidebar-primary-foreground: oklch(0.10 0.02 264);
+  --sidebar-accent:             oklch(0.22 0.03 264);
+  --sidebar-accent-foreground:  oklch(0.90 0.01 265);
+  --sidebar-border:             oklch(1 0 0 / 8%);
+  --sidebar-ring:               oklch(0.65 0.22 264 / 40%);
 }
 
+/* ─── Base Styles ─────────────────────────────────────── */
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    /* Prevent layout shift from font swaps */
+    font-synthesis: none;
+  }
+  html {
+    @apply font-sans scroll-smooth;
+    /* OpenType features: kerning, ligatures, contextual alternates */
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1, "ss01" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    /* Fluid base size: 15px on mobile → 16px on desktop */
+    font-size: clamp(15px, 1.5vw, 16px);
   }
   body {
     @apply bg-background text-foreground;
+    line-height: 1.65;
+    letter-spacing: 0.005em; /* marginal positive tracking improves Latin readability */
   }
-  html {
-    @apply font-sans;
+
+  /* ── Heading hierarchy ──────────── */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading, var(--font-sans)), sans-serif;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+    color: var(--foreground);
+  }
+  h1 { font-size: 2rem;    letter-spacing: -0.03em; }
+  h2 { font-size: 1.5rem;  letter-spacing: -0.025em; }
+  h3 { font-size: 1.25rem; letter-spacing: -0.02em; }
+  h4 { font-size: 1.1rem;  letter-spacing: -0.015em; font-weight: 600; }
+  h5 { font-size: 1rem;    letter-spacing: -0.01em;  font-weight: 600; }
+  h6 { font-size: 0.9rem;  letter-spacing: 0;        font-weight: 600; }
+
+  /* ── Minimum legible sizes ─────── */
+  /* Tailwind's text-xs = 12px. We push it to 13px globally for readability */
+  .text-xs  { font-size: 0.8125rem !important; }  /* 13px */
+
+  /* ── Muted text minimum contrast ── */
+  /* Ensures muted text is never below ~4.5:1 contrast on its background */
+  .text-muted-foreground {
+    color: var(--muted-foreground);
+    /* Minimum opacity: never ghost it below 80% */
+  }
+  /* Prevent opacity chaining on muted text */
+  .text-muted-foreground\/60,
+  .text-muted-foreground\/50,
+  .text-muted-foreground\/40 {
+    color: var(--muted-foreground) !important;
+    opacity: 0.85 !important;
+  }
+
+  /* ── Card Description global upgrade ── */
+  /* Shadcn's CardDescription defaults to text-muted-foreground text-sm.
+     We ensure it's never smaller than 14px and has proper weight. */
+  [data-slot="card-description"],
+  .text-muted-foreground.text-sm {
+    font-size: 0.875rem;
+    line-height: 1.6;
+  }
+
+  /* ── Label & Caption pattern ─── */
+  /* Common pattern in Shadcn: small uppercase labels for stat cards */
+  .stat-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+  }
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    font-family: var(--font-heading, var(--font-sans)), sans-serif;
+  }
+
+  /* ── Paragraph readability ─────── */
+  p {
+    max-width: 72ch; /* optimal line length */
+    line-height: 1.7;
+  }
+  /* Within cards and tight layouts, allow full width */
+  .card p, [data-slot="card"] p {
+    max-width: none;
+  }
+
+  /* ── Custom thin scrollbar ──────── */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 99px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: oklch(from var(--primary) l c h / 50%);
+  }
+
+  /* ── Text selection ─────────────── */
+  ::selection {
+    background: oklch(0.58 0.22 264 / 20%);
+    color: inherit;
+  }
+
+  /* ── Focus ring accessibility ───── */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
   }
 }

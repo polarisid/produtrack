@@ -68,11 +68,12 @@ const STEPS = [
 
 export function OnboardingModal() {
   const { hasSeenOnboarding, setOnboardingDone } = useGTDStore();
-  const { user } = useAuth();
+  const { user, isHydrated } = useAuth();
   const [step, setStep] = React.useState(0);
   const [animating, setAnimating] = React.useState(false);
 
-  if (hasSeenOnboarding || !user) return null;
+  // Wait until Firestore data is loaded into the store before deciding to show
+  if (!isHydrated || hasSeenOnboarding || !user) return null;
 
   const currentStep = STEPS[step];
   const Icon = currentStep.icon;

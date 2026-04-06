@@ -43,7 +43,7 @@ export function CaptureModal() {
 }
 
 export function ProcessModal() {
-  const { isProcessModalOpen, closeProcessModal, processItemData, addTask, removeInboxItem, projects } = useGTDStore();
+  const { isProcessModalOpen, closeProcessModal, processItemData, addTask, removeInboxItem, projects, contexts } = useGTDStore();
   
   const [context, setContext] = React.useState("@trabalho");
   const [priority, setPriority] = React.useState<"low" | "medium" | "high">("medium");
@@ -102,10 +102,9 @@ export function ProcessModal() {
               <Select value={context} onValueChange={(val) => setContext(val || "")}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="@trabalho">@trabalho</SelectItem>
-                  <SelectItem value="@casa">@casa</SelectItem>
-                  <SelectItem value="@rua">@rua</SelectItem>
-                  <SelectItem value="@computador">@computador</SelectItem>
+                  {contexts.map(c => (
+                    <SelectItem key={c} value={c}>{c}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -178,7 +177,117 @@ export function ProcessModal() {
 }
 
 import { Textarea } from "@/components/ui/textarea";
-import { CheckSquare, Trash2, PlusCircle, CheckCircle2, Circle, AlignLeft } from "lucide-react";
+import { CheckSquare, Trash2, PlusCircle, CheckCircle2, Circle, AlignLeft, Tag, FolderKanban } from "lucide-react";
+
+export function ProjectModal() {
+  const { isProjectModalOpen, setProjectModalOpen, addProject } = useGTDStore();
+  const [name, setName] = React.useState("");
+  const [status, setStatus] = React.useState("Em Andamento");
+  const [color, setColor] = React.useState("bg-blue-500");
+  const [dueDate, setDueDate] = React.useState("");
+
+  const handleSave = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!name.trim()) return;
+    addProject({
+      name: name.trim(),
+      status,
+      color,
+      dueDate: dueDate ? new Date(dueDate).toLocaleDateString('pt-BR') : 'Sem data'
+    });
+    setName("");
+    setDueDate("");
+    setProjectModalOpen(false);
+  };
+
+  return (
+    <Dialog open={isProjectModalOpen} onOpenChange={setProjectModalOpen}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Novo Projeto</DialogTitle>
+          <DialogDescription>Crie um novo projeto para organizar suas tarefas.</DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSave} className="grid gap-4 py-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Nome do Projeto</label>
+            <Input placeholder="Ex: Lançar Site" value={name} onChange={e => setName(e.target.value)} autoFocus />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Data Limite (Opcional)</label>
+            <Input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Cor e Status</label>
+            <div className="grid grid-cols-2 gap-2">
+              <Select value={color} onValueChange={(v) => setColor(v || "bg-blue-500")}>
+                 <SelectTrigger><SelectValue /></SelectTrigger>
+                 <SelectContent>
+                   <SelectItem value="bg-blue-500">Azul</SelectItem>
+                   <SelectItem value="bg-red-500">Vermelho</SelectItem>
+                   <SelectItem value="bg-green-500">Verde</SelectItem>
+                   <SelectItem value="bg-purple-500">Roxo</SelectItem>
+                   <SelectItem value="bg-orange-500">Laranja</SelectItem>
+                 </SelectContent>
+              </Select>
+              <Select value={status} onValueChange={(v) => setStatus(v || "Em Andamento")}>
+                 <SelectTrigger><SelectValue /></SelectTrigger>
+                 <SelectContent>
+                   <SelectItem value="Planejamento">Planejamento</SelectItem>
+                   <SelectItem value="Em Andamento">Em Andamento</SelectItem>
+                   <SelectItem value="Pausado">Pausado</SelectItem>
+                 </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <Button type="submit" className="mt-2" disabled={!name.trim()}>Criar Projeto</Button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function TagsModal() {
+  const { isTagsModalOpen, setTagsModalOpen, contexts, addContext, removeContext } = useGTDStore();
+  const [newTag, setNewTag] = React.useState("");
+
+  const handleAdd = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTag.trim()) return;
+    const tag = newTag.trim().startsWith('@') ? newTag.trim() : `@${newTag.trim()}`;
+    if (!contexts.includes(tag)) {
+       addContext(tag);
+    }
+    setNewTag("");
+  };
+
+  return (
+    <Dialog open={isTagsModalOpen} onOpenChange={setTagsModalOpen}>
+      <DialogContent className="sm:max-w-sm">
+        <DialogHeader>
+          <DialogTitle>Gerenciar Tags</DialogTitle>
+          <DialogDescription>Adicione ou remova contextos e tags para suas tarefas.</DialogDescription>
+        </DialogHeader>
+        <div className="py-4 space-y-4">
+          <form onSubmit={handleAdd} className="flex gap-2">
+            <Input placeholder="Nova tag... (ex: @estudo)" value={newTag} onChange={e => setNewTag(e.target.value)} />
+            <Button type="submit" variant="secondary">Adicionar</Button>
+          </form>
+          <div className="flex flex-col gap-2 max-h-[40vh] overflow-y-auto scrollbar-thin">
+             {contexts.map(ctx => (
+               <div key={ctx} className="flex items-center justify-between p-2 rounded-md border text-sm">
+                 <span className="font-medium">{ctx}</span>
+                 <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-destructive" onClick={() => removeContext(ctx)}>
+                   <Trash2 className="h-4 w-4" />
+                 </Button>
+               </div>
+             ))}
+             {contexts.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">Nenhuma tag cadastrada.</p>}
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 export function TaskDetailsModal() {
   const { 
@@ -343,6 +452,8 @@ export function GTDModalsProvider() {
       <CaptureModal />
       <ProcessModal />
       <TaskDetailsModal />
+      <ProjectModal />
+      <TagsModal />
     </>
   );
 }

@@ -9,11 +9,18 @@ import { Badge } from "@/components/ui/badge";
 import { useGTDStore, Task } from "@/store/useGTDStore";
 
 export default function TarefasPage() {
-  const { tasks, projects, toggleTaskStatus, openTaskDetails, updateTaskStatus } = useGTDStore();
+  const { tasks, projects, toggleTaskStatus, openTaskDetails, updateTaskStatus, contexts, setTagsModalOpen } = useGTDStore();
+  const [activeFilter, setActiveFilter] = React.useState<string>("Todas");
 
-  const todoTasks = tasks.filter(t => t.status === 'todo');
-  const doingTasks = tasks.filter(t => t.status === 'doing');
-  const doneTasks = tasks.filter(t => t.status === 'done');
+  const filteredTasks = tasks.filter(t => {
+    if (activeFilter === "Alta Prioridade") return t.priority === "high";
+    if (activeFilter !== "Todas") return t.context === activeFilter;
+    return true;
+  });
+
+  const todoTasks = filteredTasks.filter(t => t.status === 'todo');
+  const doingTasks = filteredTasks.filter(t => t.status === 'doing');
+  const doneTasks = filteredTasks.filter(t => t.status === 'done');
 
   return (
     <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in duration-500">
@@ -41,11 +48,35 @@ export default function TarefasPage() {
         </div>
 
         {/* Quick Filters */}
-        <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-none">
-          <Badge variant="default" className="px-3 py-1 cursor-pointer">Todas</Badge>
-          <Badge variant="secondary" className="px-3 py-1 cursor-pointer">@trabalho</Badge>
-          <Badge variant="secondary" className="px-3 py-1 cursor-pointer">@casa</Badge>
-          <Badge variant="secondary" className="px-3 py-1 cursor-pointer">Alta Prioridade</Badge>
+        <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-none items-center flex-wrap md:flex-nowrap">
+          <Badge 
+            variant={activeFilter === "Todas" ? "default" : "secondary"} 
+            className="px-3 py-1 cursor-pointer shrink-0"
+            onClick={() => setActiveFilter("Todas")}
+          >
+            Todas
+          </Badge>
+          {contexts.map(ctx => (
+            <Badge 
+              key={ctx}
+              variant={activeFilter === ctx ? "default" : "secondary"} 
+              className="px-3 py-1 cursor-pointer shrink-0"
+              onClick={() => setActiveFilter(ctx)}
+            >
+              {ctx}
+            </Badge>
+          ))}
+          <Badge 
+            variant={activeFilter === "Alta Prioridade" ? "default" : "secondary"} 
+            className="px-3 py-1 cursor-pointer shrink-0"
+            onClick={() => setActiveFilter("Alta Prioridade")}
+          >
+            Alta Prioridade
+          </Badge>
+
+          <Button variant="ghost" size="sm" className="ml-auto text-xs h-6 px-2 text-muted-foreground shrink-0" onClick={() => setTagsModalOpen(true)}>
+            Gerenciar Tags
+          </Button>
         </div>
 
         <TabsContent value="list" className="space-y-6 mt-0 border-none p-0 outline-none">
@@ -55,10 +86,10 @@ export default function TarefasPage() {
               Para Hoje
             </h3>
             <div className="grid gap-2">
-              {tasks.filter(t => t.dateStr === "Hoje" && t.status !== 'done').map(task => (
+              {filteredTasks.filter(t => t.dateStr === "Hoje" && t.status !== 'done').map(task => (
                 <TaskRow key={task.id} task={task} projects={projects} onToggle={() => toggleTaskStatus(task.id)} onClick={() => openTaskDetails(task.id)} />
               ))}
-              {tasks.filter(t => t.dateStr === "Hoje" && t.status !== 'done').length === 0 && (
+              {filteredTasks.filter(t => t.dateStr === "Hoje" && t.status !== 'done').length === 0 && (
                 <p className="text-sm text-muted-foreground italic py-2">Nenhuma tarefa pendente para hoje.</p>
               )}
             </div>
@@ -70,7 +101,7 @@ export default function TarefasPage() {
               Próximos Dias & Sem Data
             </h3>
             <div className="grid gap-2">
-              {tasks.filter(t => t.dateStr !== "Hoje" && t.status !== 'done').map(task => (
+              {filteredTasks.filter(t => t.dateStr !== "Hoje" && t.status !== 'done').map(task => (
                 <TaskRow key={task.id} task={task} projects={projects} onToggle={() => toggleTaskStatus(task.id)} onClick={() => openTaskDetails(task.id)} />
               ))}
             </div>

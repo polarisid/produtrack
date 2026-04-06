@@ -10,13 +10,14 @@ import { loadUserDataFromFirestore, saveUserDataToFirestore } from "@/lib/firest
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  isHydrated: boolean;
 }
 
-const AuthContext = React.createContext<AuthContextType>({ user: null, loading: true });
+const AuthContext = React.createContext<AuthContextType>({ user: null, loading: true, isHydrated: false });
 
 // Fields to persist (not transient modal state)
 const PERSISTED_KEYS: (keyof PersistedData)[] = [
-  'inbox', 'tasks', 'projects', 'habits', 'hasSeenOnboarding'
+  'inbox', 'tasks', 'projects', 'habits', 'contexts', 'hasSeenOnboarding'
 ];
 
 function extractPersistedData(state: ReturnType<typeof useGTDStore.getState>): Partial<PersistedData> {
@@ -30,6 +31,7 @@ function extractPersistedData(state: ReturnType<typeof useGTDStore.getState>): P
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = React.useState<User | null>(null);
   const [loading, setLoading] = React.useState(true);
+  const [isHydrated, setIsHydrated] = React.useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -62,6 +64,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Brand new user — start with fresh empty state
           useGTDStore.getState().resetToEmpty();
         }
+        // Mark hydration as complete AFTER store is populated
+        setIsHydrated(true);
 
         // --- Subscribe to store and debounce-save to Firestore ---
         unsubscribeStore = useGTDStore.subscribe((state) => {
@@ -79,6 +83,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else {
         // Logged out — clear in-memory store
         useGTDStore.getState().resetToEmpty();
+        setIsHydrated(false);
 
         if (pathname !== "/login") {
           router.push("/login");
@@ -95,7 +100,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider value={{ user, loading, isHydrated }}>
       {children}
     </AuthContext.Provider>
   );

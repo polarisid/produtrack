@@ -46,6 +46,7 @@ export type PersistedData = {
   tasks: Task[];
   projects: Project[];
   habits: Habit[];
+  contexts: string[];
   hasSeenOnboarding: boolean;
 };
 
@@ -58,6 +59,12 @@ type GTDState = PersistedData & {
   processItemData: InboxItem | null;
   openProcessModal: (item: InboxItem) => void;
   closeProcessModal: () => void;
+  
+  isProjectModalOpen: boolean;
+  setProjectModalOpen: (open: boolean) => void;
+
+  isTagsModalOpen: boolean;
+  setTagsModalOpen: (open: boolean) => void;
 
   selectedTaskDetailsId: string | null;
   openTaskDetails: (id: string) => void;
@@ -69,6 +76,9 @@ type GTDState = PersistedData & {
   setOnboardingDone: () => void;
 
   // Data actions
+  addContext: (context: string) => void;
+  removeContext: (context: string) => void;
+
   addInboxItem: (title: string) => void;
   removeInboxItem: (id: string) => void;
 
@@ -93,6 +103,7 @@ const EMPTY_DATA: PersistedData = {
   tasks: [],
   projects: [],
   habits: [],
+  contexts: ["@trabalho", "@casa", "@rua", "@computador"],
   hasSeenOnboarding: false,
 };
 
@@ -107,6 +118,12 @@ export const useGTDStore = create<GTDState>((set) => ({
   openProcessModal: (item) => set({ isProcessModalOpen: true, processItemData: item }),
   closeProcessModal: () => set({ isProcessModalOpen: false, processItemData: null }),
 
+  isProjectModalOpen: false,
+  setProjectModalOpen: (open) => set({ isProjectModalOpen: open }),
+
+  isTagsModalOpen: false,
+  setTagsModalOpen: (open) => set({ isTagsModalOpen: open }),
+
   selectedTaskDetailsId: null,
   openTaskDetails: (id) => set({ selectedTaskDetailsId: id }),
   closeTaskDetails: () => set({ selectedTaskDetailsId: null }),
@@ -114,6 +131,14 @@ export const useGTDStore = create<GTDState>((set) => ({
   hydrate: (data) => set((state) => ({ ...state, ...data })),
   resetToEmpty: () => set((state) => ({ ...state, ...EMPTY_DATA })),
   setOnboardingDone: () => set({ hasSeenOnboarding: true }),
+
+  addContext: (context) => set((state) => ({
+    contexts: state.contexts.includes(context) ? state.contexts : [...state.contexts, context]
+  })),
+
+  removeContext: (context) => set((state) => ({
+    contexts: state.contexts.filter(c => c !== context)
+  })),
 
   addInboxItem: (title) => set((state) => ({
     inbox: [{ id: Math.random().toString(36).substring(7), title, createdAt: Date.now() }, ...state.inbox]
@@ -194,7 +219,7 @@ export const useGTDStore = create<GTDState>((set) => ({
 }));
 
 // Fields that should be saved/loaded per user
-const PERSISTED_KEYS: (keyof PersistedData)[] = ['inbox', 'tasks', 'projects', 'habits', 'hasSeenOnboarding'];
+const PERSISTED_KEYS: (keyof PersistedData)[] = ['inbox', 'tasks', 'projects', 'habits', 'contexts', 'hasSeenOnboarding'];
 
 export function getUserStorageKey(uid: string) {
   return `gtd-data-${uid}`;
