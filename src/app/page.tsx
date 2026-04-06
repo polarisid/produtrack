@@ -27,6 +27,9 @@ export default function Dashboard() {
   const completedTasksCount = tasksToday.filter(t => t.status === 'done').length;
   const tasksProgress = tasksToday.length > 0 ? (completedTasksCount / tasksToday.length) * 100 : 0;
 
+  const maxStreak = habits.length > 0 ? Math.max(...habits.map(h => h.streak)) : 0;
+  const streakLabel = maxStreak > 0 ? `${maxStreak} Dias` : 'Sem streak';
+
   // Weekly load: percentage of all tasks (not "Sem data") that are done
   const scheduledTasks = tasks.filter(t => t.dateStr && t.dateStr !== 'Sem data');
   const doneTasks = scheduledTasks.filter(t => t.status === 'done');
@@ -51,7 +54,7 @@ export default function Dashboard() {
         <div className="flex items-center gap-4 bg-card border rounded-2xl px-4 py-2 shadow-sm">
           <div className="flex items-center gap-2">
             <Flame className="h-5 w-5 text-orange-500 fill-orange-500/20" />
-            <span className="font-semibold text-sm">12 Dias</span>
+            <span className="font-semibold text-sm">{streakLabel}</span>
           </div>
           <div className="h-4 w-px bg-border" />
           <div className="flex items-center gap-2">

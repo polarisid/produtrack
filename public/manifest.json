@@ -1,21 +1,28 @@
 {
-  "name": "Central de Produtividade",
+  "name": "ProduTrack — Central de Produtividade",
   "short_name": "ProduTrack",
-  "description": "Plataforma de Produtividade GTD e Hábitos",
+  "description": "Gerencie tarefas, projetos e hábitos com o método GTD.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "background_color": "#0f1117",
+  "theme_color": "#4f46e5",
+  "categories": ["productivity", "lifestyle"],
+  "lang": "pt-BR",
   "icons": [
     {
       "src": "/icon-192x192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "/icon-512x512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
+

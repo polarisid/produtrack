@@ -29,9 +29,9 @@ const NAV_ITEMS = [
   { name: "Dashboard",  href: "/",          icon: LayoutDashboard },
   { name: "Inbox",      href: "/inbox",      icon: Inbox },
   { name: "Tarefas",    href: "/tarefas",    icon: CheckSquare },
+  { name: "Hábitos",    href: "/habitos",    icon: Target },
   { name: "Projetos",   href: "/projetos",   icon: FolderKanban },
   { name: "Calendário", href: "/calendario", icon: Calendar },
-  { name: "Hábitos",    href: "/habitos",    icon: Target },
   { name: "Revisão",    href: "/revisao",    icon: CalendarDays },
 ];
 
@@ -39,6 +39,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const setCaptureModalOpen = useGTDStore(state => state.setCaptureModalOpen);
   const { user, loading } = useAuth();
+
+  // Register service worker
+  React.useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    }
+  }, []);
 
   if (loading) {
     return (

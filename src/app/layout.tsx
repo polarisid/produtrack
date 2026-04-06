@@ -18,12 +18,16 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Central de Produtividade",
-  description: "Gerenciamento GTD e Hábitos para máxima performance.",
+  title: "ProduTrack — Central de Produtividade",
+  description: "Gerencie tarefas, projetos e hábitos com o método GTD.",
   manifest: "/manifest.json",
+  icons: {
+    icon: "/icon-512x512.png",
+    apple: "/apple-touch-icon.png",
+  },
   appleWebApp: {
     capable: true,
-    statusBarStyle: "default",
+    statusBarStyle: "black-translucent",
     title: "ProduTrack",
   },
 };
