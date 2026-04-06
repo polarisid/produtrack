@@ -73,7 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           saveTimer = setTimeout(() => {
             const data = extractPersistedData(state);
             saveUserDataToFirestore(currentUser.uid, data);
-          }, 1200); // debounce: save 1.2s after last change
+          }, 300); // debounce: save 300ms after last change to avoid data loss on reload
         });
 
         // Route guard

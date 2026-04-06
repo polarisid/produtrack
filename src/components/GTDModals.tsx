@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useGTDStore } from "@/store/useGTDStore";
+import { clarifyInboxItem, breakdownTask, unblockTask, UnblockResult } from "@/lib/gtd-ai";
+import { Sparkles, Brain, Zap } from "lucide-react";
 
 export function CaptureModal() {
   const { isCaptureModalOpen, setCaptureModalOpen, addInboxItem } = useGTDStore();
@@ -50,6 +52,8 @@ export function ProcessModal() {
   const [projectId, setProjectId] = React.useState<string>("none");
   const [dateStr, setDateStr] = React.useState("Hoje");
   const [customDate, setCustomDate] = React.useState("");
+  const [description, setDescription] = React.useState("");
+  const [isClarifying, setIsClarifying] = React.useState(false);
 
   React.useEffect(() => {
     if (isProcessModalOpen) {
@@ -58,6 +62,8 @@ export function ProcessModal() {
       setProjectId("none");
       setDateStr("Hoje");
       setCustomDate("");
+      setDescription("");
+      setIsClarifying(false);
     }
   }, [isProcessModalOpen]);
 
@@ -79,10 +85,31 @@ export function ProcessModal() {
       context,
       priority,
       projectId: projectId === "none" ? undefined : projectId,
-      dateStr: finalDate
+      dateStr: finalDate,
+      description: description.trim() !== "" ? description.trim() : undefined
     });
     removeInboxItem(processItemData.id);
     closeProcessModal();
+  };
+
+  const handleClarify = async () => {
+    setIsClarifying(true);
+    try {
+      const res = await clarifyInboxItem(processItemData.title);
+      const tag = res.context;
+      const tId = tag.startsWith('@') ? tag : `@${tag}`;
+      if (!contexts.includes(tId)) {
+        // we could add it dynamically, but for now we fallback
+        setContext(contexts[0] || "@trabalho");
+      } else {
+         setContext(tId);
+      }
+      setPriority(res.priority);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsClarifying(false);
+    }
   };
 
   return (
@@ -90,9 +117,20 @@ export function ProcessModal() {
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Processar Item</DialogTitle>
-          <DialogDescription className="text-foreground font-medium text-base mt-2 p-3 bg-muted rounded-lg border">
-            {processItemData.title}
-          </DialogDescription>
+          <div className="flex items-start gap-2 mt-2">
+            <DialogDescription className="text-foreground font-medium text-base p-3 bg-muted rounded-lg border flex-1 break-words">
+              {processItemData.title}
+            </DialogDescription>
+            <Button 
+              size="icon" 
+              disabled={isClarifying} 
+              onClick={handleClarify} 
+              className="h-[48px] w-[48px] shrink-0 bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20 rounded-lg"
+              title="Esclarecer com IA"
+            >
+              <Sparkles className={`w-5 h-5 ${isClarifying ? 'animate-spin' : ''}`} />
+            </Button>
+          </div>
         </DialogHeader>
         
         <div className="grid gap-4 py-4">
@@ -159,6 +197,16 @@ export function ProcessModal() {
                 />
               </div>
             )}
+            
+            <div className="col-span-2 space-y-2">
+              <label className="text-sm font-medium">Descrição (Opcional)</label>
+              <Textarea 
+                placeholder="Detalhes ou anotações da tarefa..." 
+                value={description} 
+                onChange={(e) => setDescription(e.target.value)} 
+                className="w-full min-h-[80px]"
+              />
+            </div>
           </div>
         </div>
 
@@ -306,7 +354,29 @@ export function TaskDetailsModal() {
   const task = tasks.find(t => t.id === selectedTaskDetailsId);
   const [newSubtask, setNewSubtask] = React.useState("");
 
+  const [isBreaking, setIsBreaking] = React.useState(false);
+  const [isUnblocking, setIsUnblocking] = React.useState(false);
+  const [unblockRes, setUnblockRes] = React.useState<UnblockResult | null>(null);
+
   if (!task) return null;
+
+  const handleBreakdown = async () => {
+    setIsBreaking(true);
+    try {
+      const parts = await breakdownTask(task.title, task.description);
+      parts.forEach(p => addSubtask(task.id, p));
+    } catch (e) { console.error(e); }
+    setIsBreaking(false);
+  };
+
+  const handleUnblock = async () => {
+    setIsUnblocking(true);
+    try {
+      const res = await unblockTask(task.title, task.description);
+      setUnblockRes(res);
+    } catch (e) { console.error(e); }
+    setIsUnblocking(false);
+  };
 
   const handleAddSubtask = (e: React.FormEvent) => {
     e.preventDefault();
@@ -382,6 +452,25 @@ export function TaskDetailsModal() {
               onChange={(e) => updateTaskDescription(task.id, e.target.value)}
               className="min-h-[100px] resize-y"
             />
+            {unblockRes && (
+              <div className="bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800 rounded-lg p-4 mt-2 animate-in fade-in slide-in-from-top-2">
+                 <div className="flex items-center gap-2 mb-2 text-indigo-700 dark:text-indigo-400 font-semibold">
+                    <Brain className="w-4 h-4" /> Dica para Destravar
+                 </div>
+                 <p className="text-sm font-medium mb-1"><strong>Primeiro passo (5 min):</strong> {unblockRes.nextSimpleStep}</p>
+                 <p className="text-xs text-muted-foreground mb-3">Tempo: {unblockRes.timeEstimate} | Energia: {unblockRes.energyLevel}</p>
+                 <p className="text-sm text-indigo-800 dark:text-indigo-300 italic">"{unblockRes.advice}"</p>
+                 <Button size="sm" variant="outline" className="mt-3 text-xs w-full" onClick={() => addSubtask(task.id, unblockRes.nextSimpleStep)}>Definir como Próximo Passo</Button>
+              </div>
+            )}
+            <div className="flex items-center gap-2 mt-2">
+              <Button size="sm" variant="secondary" className="flex-1 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100" onClick={handleUnblock} disabled={isUnblocking}>
+                <Zap className={`w-4 h-4 mr-2 ${isUnblocking ? 'animate-pulse' : ''}`} /> Desvendar Fluxo
+              </Button>
+              <Button size="sm" variant="secondary" className="flex-1 bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-400 hover:bg-purple-100" onClick={handleBreakdown} disabled={isBreaking}>
+                <Sparkles className={`w-4 h-4 mr-2 ${isBreaking ? 'animate-spin' : ''}`} /> Quebrar em Etapas
+              </Button>
+            </div>
           </div>
 
           {/* Subtasks area */}

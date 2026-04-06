@@ -1,10 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { CalendarDays, CheckCircle2, Circle, ArrowRight } from "lucide-react";
+import { CalendarDays, CheckCircle2, Circle, ArrowRight, Sparkles, Brain, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { useGTDStore } from "@/store/useGTDStore";
+import { generateWeeklyInsights, WeeklyInsightsResult } from "@/lib/gtd-ai";
 
 const REVIEW_STEPS = [
   { id: 1, title: "Esvaziar a mente", desc: "Coloque tudo que está solto no papel no seu Inbox." },
@@ -15,12 +17,27 @@ const REVIEW_STEPS = [
 ];
 
 export default function RevisaoPage() {
+  const { tasks } = useGTDStore();
   const [completedSteps, setCompletedSteps] = React.useState<number[]>([]);
+  const [aiInsights, setAiInsights] = React.useState<WeeklyInsightsResult | null>(null);
+  const [isGenerating, setIsGenerating] = React.useState(false);
 
   const toggleStep = (id: number) => {
     setCompletedSteps(prev => 
       prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
     );
+  };
+
+  const handleGenerateInsights = async () => {
+    setIsGenerating(true);
+    try {
+      const res = await generateWeeklyInsights(tasks);
+      setAiInsights(res);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const handleFinalizar = () => {
@@ -90,6 +107,65 @@ export default function RevisaoPage() {
         </CardContent>
       </Card>
       
+      {/* SEÇÃO DE IA */}
+      <Card className="border-indigo-500/20 shadow-md bg-gradient-to-br from-indigo-50/30 to-purple-50/30 dark:from-indigo-950/20 dark:to-purple-950/20 overflow-hidden">
+        <CardHeader className="pb-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-lg flex items-center gap-2 text-indigo-700 dark:text-indigo-400">
+                <Brain className="w-5 h-5" /> Retrospectiva Inteligente
+              </CardTitle>
+              <CardDescription>Deixe a engenharia de IA analisar sua semana e projetar a próxima.</CardDescription>
+            </div>
+            {!aiInsights && (
+              <Button onClick={handleGenerateInsights} disabled={isGenerating} size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white">
+                <Sparkles className={`w-4 h-4 mr-1.5 ${isGenerating ? 'animate-spin' : ''}`} />
+                {isGenerating ? 'Analisando...' : 'Gerar Análise'}
+              </Button>
+            )}
+          </div>
+        </CardHeader>
+        {aiInsights && (
+          <CardContent className="space-y-5">
+            <p className="text-indigo-900 dark:text-indigo-100 font-medium text-[15px]">{aiInsights.summary}</p>
+            
+            <div className="grid sm:grid-cols-2 gap-4">
+               {aiInsights.delayedTasks.length > 0 && (
+                 <div className="bg-white/50 dark:bg-black/20 p-4 rounded-lg border border-indigo-100 dark:border-indigo-900/50">
+                    <h5 className="text-sm font-semibold text-rose-600 dark:text-rose-400 mb-2">Tarefas Deslizando</h5>
+                    <ul className="text-sm space-y-1">
+                      {aiInsights.delayedTasks.map((t, i) => <li key={i} className="text-slate-600 dark:text-slate-400">-{t}</li>)}
+                    </ul>
+                 </div>
+               )}
+               {aiInsights.bottlenecks.length > 0 && (
+                 <div className="bg-white/50 dark:bg-black/20 p-4 rounded-lg border border-indigo-100 dark:border-indigo-900/50">
+                    <h5 className="text-sm font-semibold text-amber-600 dark:text-amber-400 mb-2">Gargalos Identificados</h5>
+                    <ul className="text-sm space-y-1">
+                      {aiInsights.bottlenecks.map((t, i) => <li key={i} className="text-slate-600 dark:text-slate-400">-{t}</li>)}
+                    </ul>
+                 </div>
+               )}
+            </div>
+
+            <div className="bg-white/50 dark:bg-black/20 p-4 rounded-lg border border-indigo-100 dark:border-indigo-900/50 space-y-3">
+               <div>
+                  <h5 className="text-sm font-semibold text-indigo-700 dark:text-indigo-400 mb-1">Ações de Melhoria Contínua</h5>
+                  <ul className="text-sm space-y-1">
+                    {aiInsights.actionableInsights.map((t, i) => <li key={i} className="text-slate-600 dark:text-slate-400">-{t}</li>)}
+                  </ul>
+               </div>
+            </div>
+
+            <div className="p-4 bg-indigo-600 dark:bg-indigo-900/50 rounded-lg text-white">
+              <h5 className="text-xs font-bold uppercase tracking-wider text-indigo-200 mb-1 flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5"/> Foco Mestre da Próxima Semana:</h5>
+              <p className="font-medium">{aiInsights.nextWeekFocus}</p>
+            </div>
+            
+          </CardContent>
+        )}
+      </Card>
+
       <div className="text-center pt-4">
         <Button 
           size="lg" 

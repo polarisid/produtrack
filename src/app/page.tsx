@@ -18,6 +18,7 @@ import { ptBR } from "date-fns/locale";
 import { useGTDStore } from "@/store/useGTDStore";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
+import { AIFocusCard } from "@/components/AIFocusCard";
 
 export default function Dashboard() {
   const { tasks, habits, inbox, toggleTaskStatus, toggleHabit } = useGTDStore();
@@ -69,6 +70,8 @@ export default function Dashboard() {
         
         {/* Left Column - Tasks & GTD */}
         <div className="lg:col-span-2 space-y-6">
+          <AIFocusCard />
+          
           
           <Card className="border-none shadow-md bg-card/60 backdrop-blur-sm">
             <CardHeader className="pb-3">

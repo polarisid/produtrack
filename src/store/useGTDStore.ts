@@ -20,6 +20,7 @@ export type Task = {
   description?: string;
   subtasks?: { id: string; title: string; done: boolean }[];
   createdAt: number;
+  completedAt?: number;
 };
 
 export type Project = {
@@ -153,11 +154,17 @@ export const useGTDStore = create<GTDState>((set) => ({
   })),
 
   toggleTaskStatus: (id) => set((state) => ({
-    tasks: state.tasks.map(t => t.id === id ? { ...t, status: t.status === 'done' ? 'todo' : 'done' } : t)
+    tasks: state.tasks.map(t => {
+      if (t.id === id) {
+        const newStatus = t.status === 'done' ? 'todo' : 'done';
+        return { ...t, status: newStatus, completedAt: newStatus === 'done' ? Date.now() : undefined };
+      }
+      return t;
+    })
   })),
 
   updateTaskStatus: (id, status) => set((state) => ({
-    tasks: state.tasks.map(t => t.id === id ? { ...t, status } : t)
+    tasks: state.tasks.map(t => t.id === id ? { ...t, status, completedAt: status === 'done' ? Date.now() : undefined } : t)
   })),
 
   updateTaskProject: (id, projectId) => set((state) => ({
