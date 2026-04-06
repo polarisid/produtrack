@@ -179,3 +179,59 @@ Retorne APENAS um JSON array de strings (sem formatação markdown). Por exemplo
   const responseText = result.response.text().replace(/```json/g, '').replace(/```/g, '').trim();
   return JSON.parse(responseText) as string[];
 }
+
+export type SmartHabitSuggestion = {
+  name: string;
+  target: number;
+  color: string;
+  reason: string;
+};
+
+export async function suggestSmartHabits(tasks: Task[], habits: Habit[]): Promise<SmartHabitSuggestion[]> {
+  const pendingTasks = tasks.map(t => ({ title: t.title, context: t.context }));
+  const currentHabits = habits.map(h => h.name);
+
+  const prompt = `Você é um mentor especialista em rotinas e "Smart Hábitos" (Hábitos Inteligentes).
+O usuário deseja recomendações de novos hábitos para melhorar sua vida, produtividade e resolução de problemas, COM BASE nas suas tarefas pendentes reais.
+
+Contexto do usuário:
+- Hábitos atuais construídos: ${JSON.stringify(currentHabits)}
+- Tarefas e pendências ativas: ${JSON.stringify(pendingTasks)}
+
+Leia as tarefas dele como um psicólogo/estrategista. Tem muitas tarefas médicas? Sugira Água/Exercício. Tem muito trabalho/bugs? Sugira Revisão/Foco/Desconexão. Tem tarefas financeiras? Sugira Revisão de Gastos.
+Selecione até 3 hábitos extremamente cirúrgicos e acionáveis.
+Não sugira hábitos que ele já possui.
+
+Retorne APENAS um JSON (array) sem formatação markdown. Cores aceitas: "blue", "orange", "green", "red", "purple".
+Exemplo de Estrutura esperada:
+[
+  {
+    "name": "Limpeza Matinal 10 min",
+    "target": 21,
+    "color": "green",
+    "reason": "Notei várias tarefas sobre organizar a casa. 10 minutos por dia mantém o ambiente são sem pesar sua rotina."
+  }
+]`;
+
+  const result = await model.generateContent(prompt);
+  const responseText = result.response.text().replace(/```json/g, '').replace(/```/g, '').trim();
+  return JSON.parse(responseText) as SmartHabitSuggestion[];
+}
+
+export async function generateProactiveReminder(tasks: Task[], timeOfDay: 'morning' | 'afternoon' | 'evening'): Promise<string> {
+  const pendingTasks = tasks.map(t => ({ title: t.title, priority: t.priority }));
+  
+  const prompt = `Você é um Assistente Proativo de Produtividade GTD (Copiloto) que vive no celular/computador do usuário. 
+Sua função agora é mandar UMA PUSH NOTIFICATION extremamente curta e direta.
+Lembre-se: Push notifications de celular tem espaço limitadíssimo, então vá direto ao ponto! 
+
+Contexto:
+- Período do dia agora: ${timeOfDay}
+- Tarefas pendentes relevantes: ${JSON.stringify(pendingTasks.slice(0, 5))}
+
+Aja de forma amigável, como um mentor. Diga algo como "Foco total na tarefa X antes de escurecer!" ou "Você já liquidou suas prioridades hoje? Vamos resolver a tarefa Y!".
+Tamanho máximo absoluto: 80 caracteres. SEM hashtag. SEM aspas duplas em volta da resposta. APENAS a string limpa absoluta.`;
+
+  const result = await model.generateContent(prompt);
+  return result.response.text().replace(/"/g, '').trim();
+}

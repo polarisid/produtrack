@@ -147,18 +147,7 @@ export function AIFocusCard() {
               )}
               
             </motion.div>
-          ) : (
-            <motion.div 
-              key="empty"
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-              className="p-10 text-center flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 text-sm"
-            >
-              <div className="w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center mb-4">
-                <Brain className="w-6 h-6 text-indigo-400" />
-              </div>
-              <p>O Copiloto formará a sua estratégia do dia combinando seus hábitos e suas tarefas pendentes.</p>
-            </motion.div>
-          )}
+          ) : null}
         </AnimatePresence>
       </CardContent>
     </Card>

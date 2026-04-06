@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Target, Flame, Calendar as CalIcon, Plus, CheckCircle2, ChevronRight } from "lucide-react";
+import { Target, Flame, Calendar as CalIcon, Plus, CheckCircle2, ChevronRight, Sparkles, Brain } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -9,9 +9,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useGTDStore } from "@/store/useGTDStore";
+import { suggestSmartHabits, SmartHabitSuggestion } from "@/lib/gtd-ai";
 
 export default function HabitosPage() {
-  const { habits, toggleHabit, addHabit } = useGTDStore();
+  const { habits, toggleHabit, addHabit, tasks } = useGTDStore();
+  
+  const [isSuggesting, setIsSuggesting] = React.useState(false);
+  const [suggestions, setSuggestions] = React.useState<SmartHabitSuggestion[]>([]);
   
   const [isModalOpen, setModalOpen] = React.useState(false);
   const [newName, setNewName] = React.useState("");
@@ -24,6 +28,25 @@ export default function HabitosPage() {
     setModalOpen(false);
     setNewName("");
     setNewTarget("30");
+  };
+
+  const handleSuggestHabits = async () => {
+    if (isSuggesting) return;
+    setIsSuggesting(true);
+    try {
+      const res = await suggestSmartHabits(tasks, habits);
+      setSuggestions(res);
+    } catch (e) {
+      console.error(e);
+      alert("Erro ao buscar sugestões inteligentes.");
+    } finally {
+      setIsSuggesting(false);
+    }
+  };
+
+  const handleAdoptHabit = (s: SmartHabitSuggestion) => {
+    addHabit(s.name, s.target, `text-${s.color}-500`, `bg-${s.color}-500/10`);
+    setSuggestions(prev => prev.filter(x => x.name !== s.name));
   };
 
   return (
@@ -40,10 +63,46 @@ export default function HabitosPage() {
           </p>
         </div>
         
-        <Button onClick={() => setModalOpen(true)} className="w-full md:w-auto shadow-sm gap-2">
-          <Plus className="h-4 w-4" /> Novo Hábito
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+          <Button 
+            onClick={handleSuggestHabits} 
+            variant="outline" 
+            className="shadow-sm gap-2 border-indigo-200 text-indigo-600 hover:bg-indigo-50 dark:border-indigo-900/50 dark:text-indigo-400 dark:hover:bg-indigo-900/20"
+            disabled={isSuggesting}
+          >
+            {isSuggesting ? <Brain className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />} 
+            Smart Hábitos
+          </Button>
+          <Button onClick={() => setModalOpen(true)} className="shadow-sm gap-2">
+            <Plus className="h-4 w-4" /> Novo Hábito
+          </Button>
+        </div>
       </div>
+
+      {suggestions.length > 0 && (
+        <div className="bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/50 rounded-2xl p-6 animate-in slide-in-from-top-4 fade-in duration-500">
+          <div className="flex items-center gap-2 mb-4 text-indigo-600 dark:text-indigo-400">
+            <Brain className="h-5 w-5" />
+            <h2 className="font-semibold text-lg">Sugestões de Copiloto</h2>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {suggestions.map((s, i) => (
+              <div key={i} className="bg-white dark:bg-black/40 border rounded-xl p-4 shadow-sm flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className={`p-1 rounded-md bg-${s.color}-500/10 text-${s.color}-500`}><Target className="w-3.5 h-3.5"/></span>
+                    <h3 className="font-semibold text-sm">{s.name}</h3>
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed italic mb-4">"{s.reason}"</p>
+                </div>
+                <Button onClick={() => handleAdoptHabit(s)} size="sm" variant="secondary" className={`w-full bg-${s.color}-50 dark:bg-${s.color}-950/20 text-${s.color}-600 dark:text-${s.color}-400 hover:bg-${s.color}-100 dark:hover:bg-${s.color}-900/40`}>
+                  Adotar Hábito ({s.target} dias)
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-4">
         {habits.map(habit => (

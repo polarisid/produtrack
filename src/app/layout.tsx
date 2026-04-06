@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AppShell } from "@/components/layout/AppShell";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ProactiveAgent } from "@/components/ProactiveAgent";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -60,7 +61,10 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthProvider>
-            <AppShell>{children}</AppShell>
+            <AppShell>
+              <ProactiveAgent />
+              {children}
+            </AppShell>
           </AuthProvider>
         </ThemeProvider>
       </body>

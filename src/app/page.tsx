@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +24,15 @@ import { AIFocusCard } from "@/components/AIFocusCard";
 export default function Dashboard() {
   const { tasks, habits, inbox, toggleTaskStatus, toggleHabit } = useGTDStore();
   const today = format(new Date(), "EEEE, d 'de' MMMM", { locale: ptBR });
+  
+  const [greeting, setGreeting] = useState("Olá");
+
+  useEffect(() => {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) setGreeting("Bom dia");
+    else if (hour >= 12 && hour < 18) setGreeting("Boa tarde");
+    else setGreeting("Boa noite");
+  }, []);
 
   const tasksToday = tasks.filter(t => t.dateStr === "Hoje");
   const completedTasksCount = tasksToday.filter(t => t.status === 'done').length;
@@ -49,7 +59,7 @@ export default function Dashboard() {
       {/* Header Greet */}
       <section className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight mb-1">Bom dia, Daniel</h1>
+          <h1 className="text-3xl font-bold tracking-tight mb-1">{greeting}, Daniel</h1>
           <p className="text-muted-foreground capitalize">{today}</p>
         </div>
         <div className="flex items-center gap-4 bg-card border rounded-2xl px-4 py-2 shadow-sm">
