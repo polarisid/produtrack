@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { AppShell } from "@/components/layout/AppShell";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProactiveAgent } from "@/components/ProactiveAgent";
+import { InstallPrompt } from "@/components/InstallPrompt";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -63,6 +64,7 @@ export default function RootLayout({
           <AuthProvider>
             <AppShell>
               <ProactiveAgent />
+              <InstallPrompt />
               {children}
             </AppShell>
           </AuthProvider>
