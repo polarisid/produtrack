@@ -105,8 +105,15 @@ export function ProcessModal() {
          setContext(tId);
       }
       setPriority(res.priority);
-    } catch (e) {
-      console.error(e);
+      if (res.nextAction || res.type) {
+        let desc = "";
+        if (res.type && res.type !== "Task") desc += `[Sugerido pela IA como: ${res.type}]\n`;
+        if (res.nextAction) desc += `Ação Sugerida: ${res.nextAction}`;
+        setDescription(desc.trim());
+      }
+    } catch (e: any) {
+      console.error("AI Error:", e);
+      alert("Erro ao contatar a IA: " + (e.message || "Verifique o modelo e o console."));
     } finally {
       setIsClarifying(false);
     }

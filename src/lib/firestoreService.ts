@@ -54,7 +54,9 @@ export async function loadUserDataFromFirestore(uid: string): Promise<Partial<Pe
 export async function saveUserDataToFirestore(uid: string, data: Partial<PersistedData>): Promise<void> {
   try {
     const ref = doc(db, USERS_COLLECTION, uid);
-    await setDoc(ref, data, { merge: true });
+    // Sanitize data to remove any `undefined` values which crash Firestore
+    const sanitizedData = JSON.parse(JSON.stringify(data));
+    await setDoc(ref, sanitizedData, { merge: true });
   } catch (err) {
     console.error("[Firestore] Error saving user data:", err);
   }
